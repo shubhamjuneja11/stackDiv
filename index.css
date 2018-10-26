@@ -1,0 +1,25 @@
+#main {
+  width: 300px;
+  min-height: 300px;
+  background: #cc66ff;
+  float: left;
+}
+
+#buttons {
+  margin-left: 100px;
+  /*float: right;*/
+}
+body{
+  background: #ff3300;
+}
+
+.stack {
+  background: #99ff33;
+  margin: 20px;
+  text-align: center;
+}
+
+.highlight {
+  background: #669900;
+}
+
