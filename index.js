@@ -2,7 +2,9 @@ function StackManager(stackOptions) {
   this.stackHolder = stackOptions.stackHolder;
   this.addButton = stackOptions.addButton;
   this.highlightClass = stackOptions.highlightClass;
-  this.stackCount = 0;
+  this.stackElementDataProperty = stackOptions.stackElementDataProperty;
+  this.stackElementDataValue = stackOptions.stackElementDataValue;
+  this.stackElementCountData = stackOptions.stackElementCountData;
 };
 
 StackManager.prototype.init = function() {
@@ -32,27 +34,27 @@ StackManager.prototype.setStackElementListener = function() {
 };
 
 StackManager.prototype.createNewStackElement = function() {
-  var elementCount = this.getNewElementCount();
+  var elementCount = this.getTotalElementsCount();
   return $('<div>').addClass('stack')
-                   .html('<span>' + elementCount + '</span>')
-                   .data('count', elementCount);
+    .attr(this.stackElementDataProperty, this.stackElementDataValue)
+    .html('<span>' + elementCount + '</span>')
+    .data('count', elementCount);
 };
 
-StackManager.prototype.getNewElementCount = function() {
-  return ++this.stackCount;
+StackManager.prototype.getTotalElementsCount = function() {
+  return this.stackHolder.find('[' + this.stackElementDataProperty + '=' + this.stackElementDataValue + ']').length;
 }
 
 StackManager.prototype.checkLastStackElement = function() {
-  return this.getElementCount(this.selectedElement) == this.stackCount;
+  return this.getElementCount(this.selectedElement) == this.getTotalElementsCount() - 1;
 };
 
 StackManager.prototype.getElementCount = function(element) {
-  return element.data('count');
+  return element.data(this.stackElementCountData);
 };
 
 StackManager.prototype.removeElement = function() {
   this.selectedElement.remove();
-  this.stackCount--;
   this.removePreviousHighlight();
 };
 
@@ -75,7 +77,10 @@ $(function() {
   var stackOptions = {
     stackHolder: $('#stack'),
     addButton: $('#add'),
-    highlightClass: 'highlight'
+    highlightClass: 'highlight',
+    stackElementDataProperty: 'data-property',
+    stackElementDataValue: 'stack-element',
+    stackElementCountData: 'count'
   };
   var stackManager = new StackManager(stackOptions);
   stackManager.init();
