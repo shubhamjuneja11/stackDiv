@@ -14,7 +14,7 @@ StackManager.prototype.init = function() {
 
 StackManager.prototype.setAddButtonListener = function() {
   var _this = this;
-  this.addButton.click(function() {
+  this.addButton.on('click', function() {
     var newElement = _this.createNewStackElement();
     _this.stackHolder.prepend(newElement);
   });
@@ -22,8 +22,7 @@ StackManager.prototype.setAddButtonListener = function() {
 
 StackManager.prototype.setStackElementListener = function() {
   var _this = this;
-  this.stackHolder.on('click', 'div', function() {
-    _this.previousSelectedElement = _this.selectedElement;
+  this.stackHolder.on('click', '[data-property=stack-element]', function() {
     _this.selectedElement = $(this);
     if (_this.checkLastStackElement()) {
       _this.removeElement();
@@ -35,52 +34,41 @@ StackManager.prototype.setStackElementListener = function() {
 
 StackManager.prototype.createNewStackElement = function() {
   var elementCount = this.getTotalElementsCount();
-  return $('<div>').addClass('stack')
-    .attr(this.stackElementDataProperty, this.stackElementDataValue)
-    .html('<span>' + elementCount + '</span>')
-    .data('count', elementCount);
+  return $('<div>',{class: 'stack','data-property': 'stack-element', html: '<span>' + elementCount + '</span>'});
 };
 
 StackManager.prototype.getTotalElementsCount = function() {
-  return this.stackHolder.find('[' + this.stackElementDataProperty + '=' + this.stackElementDataValue + ']').length;
+  return this.stackHolder.find('[data-property=stack-element]').length;
 }
 
 StackManager.prototype.checkLastStackElement = function() {
-  return this.getElementCount(this.selectedElement) == this.getTotalElementsCount() - 1;
+  return this.selectedElement.index() == 0;
 };
 
-StackManager.prototype.getElementCount = function(element) {
-  return element.data(this.stackElementCountData);
-};
-
-StackManager.prototype.removeElement = function() {
+StackManager.prototype.removeElement = function(clickedElement) {
+  this.removeHighlightedElement();
   this.selectedElement.remove();
-  this.removePreviousHighlight();
 };
 
 StackManager.prototype.highlightSelectedElement = function() {
-  this.removePreviousHighlight();
+  this.removeHighlightedElement();
   this.selectedElement.toggleClass(this.highlightClass);
 };
 
-StackManager.prototype.removePreviousHighlight = function() {
-  if (this.previousSelectedElement && this.compareSelectedElements()) {
-    this.previousSelectedElement.removeClass(this.highlightClass);
-  }
-};
-
-StackManager.prototype.compareSelectedElements = function() {
-  return this.getElementCount(this.previousSelectedElement) != this.getElementCount(this.selectedElement);
+StackManager.prototype.removeHighlightedElement = function() {
+  var _this = this;
+  $.each(this.selectedElement.siblings(), function(index, element) {
+    $(element).removeClass(_this.highlightClass);
+  });
 };
 
 $(function() {
-  var stackOptions = {
-    stackHolder: $('#stack'),
-    addButton: $('#add'),
+  var stackContent = $('[data-property="mainstack"]'),
+   stackOptions = {
+    stackHolder: $(stackContent.find('[data-property="stackelementsholder"]')),
+    addButton: $(stackContent.find('[data-property="add"]')),
     highlightClass: 'highlight',
-    stackElementDataProperty: 'data-property',
-    stackElementDataValue: 'stack-element',
-    stackElementCountData: 'count'
+    stackElementCountData: 'count',
   };
   var stackManager = new StackManager(stackOptions);
   stackManager.init();
